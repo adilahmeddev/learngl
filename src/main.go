@@ -7,15 +7,15 @@ import (
 	"log"
 	"strings"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 func main() {
 	glfw.Init()
 
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
+	glfw.WindowHint(glfw.ContextVersionMinor, 3)
+	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, gl.TRUE)
 	window, err := glfw.CreateWindow(800, 600, "Hello World", nil, nil)
@@ -31,19 +31,12 @@ func main() {
 	vertices := []float32{
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
-		-0.5, -0.5, 0.0,
-		-0.5, 0.5, 0.0,
-	}
-
-	indicies := []uint16{
-		0, 1, 3,
-		1, 2, 3,
+		0, 0.5, 0.0,
 	}
 
 	var (
 		VAO           uint32
 		VBO           uint32
-		EBO           uint32
 		VShader       uint32
 		FShader       uint32
 		shaderProgram uint32
@@ -55,9 +48,6 @@ func main() {
 
 	gl.GenBuffers(1, &VBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
-
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, EBO)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indicies)*4, gl.Ptr(indicies), gl.STATIC_DRAW)
 	// Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointers()
 
 	// copy vertices data into VBO (it needs to be bound first)
@@ -105,44 +95,33 @@ func main() {
 		glfw.WindowHint(glfw.OpenGLProfile, gl.TRIANGLES)
 
 		// unbind the VAO (safe practice so we don't accidentally (mis)configure it later)
-		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil) // perform draw call
+		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		if window.GetKey(glfw.KeyEscape) == glfw.Press {
 			window.SetShouldClose(true)
 		}
-		// if window.GetKey(glfw.KeyQ) == glfw.Press {
-		// 	gl.ClearColor(0.8, 0.5, 0.9, 1.0)
-		// } else {
-		// 	gl.ClearColor(0.0, 0.30, 0.30, 1.00)
-		//
-		// }
-		// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		window.SwapBuffers()
 	}
 	gl.DeleteShader(FShader)
 	gl.DeleteShader(VShader)
-	// Important! Call gl.Init only under the presence of an active OpenGL context,
-	// i.e., after MakeContextCurrent.
-
 }
 
-const vertexShader = `
-#version 410 core
-
+const vertexShader = `#version 330 core
 layout (location = 0) in vec3 aPos;
 
-void main(){
-	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);
+void main()
+{
+	gl_Position = vec4(aPos, 1.0);
 }
 `
 
-const fragmentShader = `
-#version 410 core
+const fragmentShader = `#version 330 core
 
 out vec4 FragColor;
 
-void main(){
-	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+void main()
+{
+	FragColor = vec4(1.0, 0.5, 0.2, 1.0);
 }
 `
 
